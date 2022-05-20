@@ -8,6 +8,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   app.useWebSocketAdapter(new WsAdapter(app));
-  await app.listen(3000);
+  await app.listen(3000, '192.168.196.99');
 }
 bootstrap();

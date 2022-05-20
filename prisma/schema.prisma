@@ -13,7 +13,7 @@ datasource db {
 model User {
     id Int @id @default(autoincrement())
 
-    login String
+    login Int
 
     name String?
     surname String?
@@ -28,14 +28,15 @@ model User {
 
     role Int @default(0)
 
-    camp_id Int
-    camp Camp @relation(fields:[camp_id], references:[id])
+    camp_id Int?
+    camp Camp? @relation(fields:[camp_id], references:[id])
 
-    group_id Int
-    group Group @relation(fields:[group_id], references:[id])
+    group_id Int?
+    group Group? @relation(fields:[group_id], references:[id])
 
-    parent_id Int
-    parent User @relation("Parent",fields:[parent_id], references:[id])
+
+    parent_id Int?
+    parent User? @relation("Parent",fields:[parent_id], references:[id])
 
     room String?
 
@@ -97,4 +98,12 @@ model Message {
     chat Chat @relation(fields:[chat_id], references:[id])
 
      @@map("message")
+}
+
+model Role {
+     id Int @id @default(autoincrement())
+     name String
+     binary Int
+
+     @@map("role")
 }
