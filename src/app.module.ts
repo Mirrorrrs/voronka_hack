@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RoleModule } from './role/role.module';
 import { EventModule } from './event/event.module';
 import { UserModule } from './user/user.module';
+import { AlertModule } from './alert/alert.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { UserModule } from './user/user.module';
     RoleModule,
     EventModule,
     UserModule,
+    AlertModule,
+    ScheduleModule,
   ],
 })
 export class AppModule {}

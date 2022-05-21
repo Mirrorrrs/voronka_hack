@@ -6,6 +6,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { BadRequestException } from '@nestjs/common';
 
 @WebSocketGateway(8080)
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -32,9 +33,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleConnection(client: any, ...args): any {
-
-  }
+  handleConnection(client: any, ...args): any {}
 
   handleDisconnect(client) {
     // for (let i = 0; i < this.wsClients.length; i++) {
@@ -46,12 +45,19 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // this.broadcast('disconnect',{});
   }
 
-  private broadcast(event, message: any) {
+  public broadcast(event, message: any) {
     const broadCastMessage = JSON.stringify({
       message,
     });
-    for (let c of this.wsClients[event]) {
-      c.send(broadCastMessage, 'chat');
+    try {
+      for (const c of this.wsClients[event]) {
+        c.send(broadCastMessage);
+      }
+    } catch (e) {
+      throw new BadRequestException({
+        status: -7,
+        message: 'Client socket not found',
+      });
     }
   }
 }

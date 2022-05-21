@@ -17,11 +17,30 @@ model User {
     balance Float @default(0)
 
     name String
+    surname String?
+    second_name String?
+
+    phone String?
+    email String?
+
+    diagnozes Diagnoz[] @relation("UserDiagnoz")
+
 
     parent_id Int?
     parent User? @relation("ParentChild", fields: [parent_id], references: [id])
 
     children User[] @relation("ParentChild")
+
+    camp_admin Camp?  @relation("CampAdmin")
+    group_leader Group? @relation("GroupLeader")
+
+    camp_member_id Int?
+    camp_member Camp? @relation("CampMember",fields:[camp_member_id], references:[id])
+
+    group_member_id Int?
+    group_member Group? @relation("GroupMember",fields:[group_member_id], references:[id])
+
+    messages Message[] @relation("MessageSender")
 
     role Int @default(0)
 
@@ -36,4 +55,91 @@ model Role {
     binary Int
 
     @@map("role")
+}
+
+model Camp {
+     id Int @id @default(autoincrement())
+     name String
+     admin_id Int
+     admin User @relation("CampAdmin", fields:[admin_id], references:[id])
+     members User[] @relation("CampMember")
+     groups Group[] @relation("CampGroup")
+
+     @@map("camp")
+}
+
+model Group {
+    id Int @id @default(autoincrement())
+    name String
+    leader_id Int
+    leader User @relation("GroupLeader", fields:[leader_id], references:[id])
+    members User[] @relation("GroupMember")
+    chats Chat[] @relation("GroupChat")
+    alerts GroupAlert[] @relation("GroupAlerts")
+    schedules Schedule[] @relation("Schedules")
+
+    camp_id Int
+    camp Camp @relation("CampGroup", fields:[camp_id], references:[id])
+
+    @@map("group")
+}
+
+model Chat {
+    id Int @id @default(autoincrement())
+    name String
+
+    group_id Int
+    group Group @relation("GroupChat", fields:[group_id], references:[id])
+
+    access_binary Int
+
+    messages Message[] @relation("ChatMessage")
+
+    @@map("chat")
+}
+
+model Message {
+     id Int @id @default(autoincrement())
+     message String
+
+     sender_id Int
+     sender User @relation("MessageSender", fields:[sender_id], references:[id])
+
+     chat_id Int
+     chat Chat @relation("ChatMessage", fields:[chat_id], references:[id])
+
+     @@map("message")
+}
+
+model GroupAlert {
+    id Int @id @default(autoincrement())
+    message String
+
+    group_id Int
+    group Group @relation("GroupAlerts", fields:[group_id], references:[id])
+
+    @@map("group_alert")
+}
+
+model Schedule {
+    id Int @id @default(autoincrement())
+    date DateTime @default(now())
+    time_from DateTime
+    time_to DateTime
+    action String
+
+    group_id Int
+    group Group @relation("Schedules", fields:[group_id], references:[id])
+
+    @@map("schedule")
+}
+
+model Diagnoz {
+      id Int @id @default(autoincrement())
+      user_id Int
+      user User @relation("UserDiagnoz", fields:[user_id], references:[id])
+      title String
+      description String
+
+      @@map("diagnoz")
 }

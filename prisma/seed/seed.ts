@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 import * as argon from 'argon2';
 
@@ -35,86 +36,51 @@ async function main() {
     ],
   });
 
+  await prisma.user.create({
+    data: {
+      name: 'Child 1',
+      role: 1 << 3,
+      hash: await argon.hash('1234'),
+      login: 'child_1',
+      wallet_hash: await argon.hash(generateRandomPassword(60)),
+      diagnozes: {
+        create: {
+          title: 'Аллергия',
+          description: 'Не переносит яблоки',
+        },
+      },
+    },
+  });
+
   await prisma.user.createMany({
     data: [
       {
-        name:"Admin",
+        name: 'Admin',
         role: 1 << 0,
         hash: await argon.hash('1234'),
         login: 'admin',
       },
       {
-        name:"Ruler",
+        name: 'Ruler',
         role: 1 << 1,
         hash: await argon.hash('1234'),
         login: 'ruler',
       },
       {
-        name:"Parent",
+        name: 'Parent',
         role: 1 << 1,
         hash: await argon.hash('1234'),
         login: 'parent',
       },
       {
-        name: "Child 1",
-        role: 1 << 3,
-        hash: await argon.hash('1234'),
-        login: 'child_1',
-        wallet_hash: await argon.hash(
-          generateRandomPassword(60),
-        ),
-      },
-      {
-        name: "Child 2",
+        name: 'Child 2',
         role: 1 << 3,
         hash: await argon.hash('1234'),
         login: 'child_2',
-        wallet_hash: await argon.hash(
-          generateRandomPassword(60),
-        ),
+        wallet_hash: await argon.hash(generateRandomPassword(60)),
       },
     ],
   });
-
-  // const date = new Date()
-  //
-  // await prisma.user.create({
-  //   data:{
-  //     login: 2000,
-  //     name: 'Savva',
-  //     surname: 'Shulgin',
-  //     second_name: 'Dmitrievich',
-  //     hash: await argon.hash('savva2004'),
-  //     email: 'savvashu@gmail.com',
-  //     phone: '+79178964543',
-  //     role: 1 << 1,
-  //     camp:{
-  //       create:{
-  //         name: 'My camp',
-  //         groups:{
-  //           create: {
-  //             name:"Camp group",
-  //             schedules:{
-  //               create:{
-  //                 date: date,
-  //                 time_from: date,
-  //                 time_to: new Date(date.getTime()+200000000),
-  //                 action: "Кушаем",
-  //               }
-  //             },
-  //             alarms:{
-  //               create:{
-  //                 time: date,
-  //
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //
-  //   }
-  // })
 
 
 }

@@ -1,14 +1,73 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
 import { UtilService } from '../util/util.service';
+import { EventsGateway } from '../event/events.getaway';
 
 @Injectable()
 export class UserService {
   constructor(
     private prismaService: PrismaService,
     private utilService: UtilService,
+    private eventGetaway: EventsGateway,
   ) {}
+
+  async setChildren(){
+
+  }
+
+  async updateDataStaticUserData(user_id, dto) {
+    const user = await this.prismaService.user.findFirst({
+      where: { id: user_id },
+    });
+    if (this.utilService.checkRole(user.role, 'Администратор')) {
+      try {
+        await this.prismaService.user.update({
+          where: {
+            id: parseInt(dto.user_id),
+          },
+          data: {
+            camp_member_id: dto.camp_member_id,
+            group_member_id: dto.group_member_id,
+            role: dto.role,
+            name: dto.name,
+            login: dto.login,
+            ...(dto.password && { hash: await argon.hash(dto.password) }),
+          },
+        });
+
+        return {
+          success: true,
+        };
+      } catch (e) {
+        throw new BadRequestException({
+          message: 'wrong data',
+        });
+      }
+    }
+
+    throw new ForbiddenException({
+      message: 'wrong role',
+    });
+  }
+
+  async getMe(user_id) {
+    return await this.prismaService.user.findFirst({
+      where: {
+        id: user_id,
+      },
+      include: {
+        group_member: true,
+        camp_member: true,
+        parent: true,
+        diagnozes: true,
+      },
+    });
+  }
 
   async getWalletHash(user_id) {
     const wallet_hash = await this.prismaService.user.findFirst({
@@ -57,7 +116,11 @@ export class UserService {
           },
         });
         if (sender_instance.balance > sender_credentials.price) {
-          console.log('transfer completed');
+          console.log(`payment_${sender_credentials.sender_id}`);
+          this.eventGetaway.broadcast(
+            `payment_${sender_credentials.sender_id}`,
+            'submit transaction',
+          );
         } else {
           console.log('no money');
         }

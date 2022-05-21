@@ -30,10 +30,10 @@ export class UtilService {
     }
   }
 
-  async checkRole(current_role, role_id) {
-    const role = await this.prismaService.role.findUnique({
+  async checkRole(current_role, name) {
+    const role = await this.prismaService.role.findFirst({
       where: {
-        id: role_id,
+        name: name,
       },
     });
 
