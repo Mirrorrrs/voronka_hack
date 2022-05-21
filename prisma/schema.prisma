@@ -12,98 +12,28 @@ datasource db {
 
 model User {
     id Int @id @default(autoincrement())
-
-    login Int
-
-    name String?
-    surname String?
-    second_name String?
+    login String
     hash String
+    balance Float @default(0)
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    name String
 
-    email String? @unique
-    phone String? @unique
+    parent_id Int?
+    parent User? @relation("ParentChild", fields: [parent_id], references: [id])
+
+    children User[] @relation("ParentChild")
 
     role Int @default(0)
 
-    camp_id Int?
-    camp Camp? @relation(fields:[camp_id], references:[id])
-
-    group_id Int?
-    group Group? @relation(fields:[group_id], references:[id])
-
-
-    parent_id Int?
-    parent User? @relation("Parent",fields:[parent_id], references:[id])
-
-    room String?
-
-    balance Float @default(0)
-
-    sex Boolean @default(true)
-
-    messages Message[]
-
-    children User[] @relation("Parent")
-
-    date_of_birth DateTime @default(now())
+    wallet_hash String?
 
     @@map("user")
 }
 
-model Camp {
-    id Int @id @default(autoincrement())
-    name String
-
-    groups Group[]
-
-    members User[]
-
-    @@map("camp")
-}
-
-model Group {
-    id Int @id @default(autoincrement())
-    name String
-    camp_id Int
-    camp Camp @relation(fields:[camp_id], references:[id])
-
-    chats Chat[]
-
-    members User[]
-
-     @@map("group")
-}
-
-model Chat {
-    id Int @id @default(autoincrement())
-    group_id Int
-    group Group @relation(fields:[group_id], references:[id])
-
-    messages Message[]
-
-     @@map("chat")
-}
-
-model Message {
-     id Int @id @default(autoincrement())
-     user_id Int
-     user User @relation(fields:[user_id], references:[id])
-     message String
-     createdAt DateTime @default(now())
-
-    chat_id Int
-    chat Chat @relation(fields:[chat_id], references:[id])
-
-     @@map("message")
-}
-
 model Role {
-     id Int @id @default(autoincrement())
-     name String
-     binary Int
+    id Int @id @default(autoincrement())
+    name String
+    binary Int
 
-     @@map("role")
+    @@map("role")
 }

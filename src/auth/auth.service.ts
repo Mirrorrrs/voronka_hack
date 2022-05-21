@@ -12,6 +12,7 @@ import { UtilService } from '../util/util.service';
 import { SignInDto, SignUpDto } from './dto';
 
 export interface IAccessToken {
+  user_id: number;
   accessToken: string;
 }
 
@@ -33,7 +34,7 @@ export class AuthService {
     if (user) {
       const pwMatches = await argon.verify(user.hash, dto.password);
       if (pwMatches) {
-        return this.signToken(user.id, user.login.toString());
+        return this.signToken(user.id);
       } else {
         throw new ForbiddenException('Wrong credentials');
       }
@@ -60,8 +61,6 @@ export class AuthService {
         data: {
           login: login,
           name: dto.name,
-          second_name: dto.second_name,
-          surname: dto.surname,
           hash: hash,
         },
       });
@@ -78,15 +77,15 @@ export class AuthService {
     }
   }
 
-  async signToken(userId: number, login: string): Promise<IAccessToken> {
+  async signToken(user_id: number): Promise<IAccessToken> {
     const payload = {
-      sub: userId,
-      login: login,
+      sub: user_id,
+      user_id: user_id,
     };
 
     return {
+      user_id: user_id,
       accessToken: await this.jwt.signAsync(payload, {
-        expiresIn: '15m',
         secret: this.configService.get('JWTSECRET'),
       }),
     };

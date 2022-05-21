@@ -3,7 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UtilService {
-  constructor(private prismaService: PrismaService){}
+  constructor(private prismaService: PrismaService) {}
+
   generateRandomPassword(length) {
     let result = '';
     const characters =
