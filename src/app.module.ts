@@ -8,6 +8,9 @@ import { EventModule } from './event/event.module';
 import { UserModule } from './user/user.module';
 import { AlertModule } from './alert/alert.module';
 import { ScheduleModule } from './schedule/schedule.module';
+import { ReviewModule } from './review/review.module';
+import { GroupModule } from './group/group.module';
+import { CampModule } from './camp/camp.module';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { ScheduleModule } from './schedule/schedule.module';
     UserModule,
     AlertModule,
     ScheduleModule,
+    ReviewModule,
+    GroupModule,
+    CampModule,
   ],
 })
 export class AppModule {}

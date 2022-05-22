@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 import * as argon from 'argon2';
+import { faker } from '@faker-js/faker';
 
 function generateRandomPassword(length) {
   let result = '';
@@ -36,12 +37,61 @@ async function main() {
     ],
   });
 
+  const admin = await prisma.user.create({
+    data: {
+      name: faker.name.firstName(),
+      surname: faker.name.lastName(),
+      second_name: faker.name.middleName(),
+      phone: faker.phone.phoneNumber(),
+      email: faker.internet.email(),
+      role: 1 << 0,
+      hash: await argon.hash('1234'),
+      login: 'admin@mail.ru',
+    },
+  });
+
+  const camp = await prisma.camp.create({
+    data: {
+      name: 'ДОЛ Зеленый Сад',
+      admin_id: admin.id,
+    },
+  });
+
+  const ruler = await prisma.user.create({
+    data: {
+      name: faker.name.firstName(),
+      surname: faker.name.lastName(),
+      second_name: faker.name.middleName(),
+      phone: faker.phone.phoneNumber(),
+      email: faker.internet.email(),
+      camp_member_id: camp.id,
+      role: 1 << 1,
+      hash: await argon.hash('1234'),
+      login: 'ruler@mail.ru',
+    },
+  });
+
+  const group = await prisma.group.create({
+    data: {
+      name: 'Веснушки',
+      leader_id: ruler.id,
+      camp_id: camp.id,
+    },
+  });
+
   await prisma.user.create({
     data: {
-      name: 'Child 1',
+      name: faker.name.firstName(),
+      surname: faker.name.lastName(),
+      second_name: faker.name.middleName(),
       role: 1 << 3,
       hash: await argon.hash('1234'),
-      login: 'child_1',
+      phone: faker.phone.phoneNumber(),
+      email: faker.internet.email(),
+      balance: 10000,
+      camp_member_id: camp.id,
+      login: 'brawlstars1@mail.ru',
+      group_member_id: group.id,
       wallet_hash: await argon.hash(generateRandomPassword(60)),
       diagnozes: {
         create: {
@@ -55,34 +105,32 @@ async function main() {
   await prisma.user.createMany({
     data: [
       {
-        name: 'Admin',
-        role: 1 << 0,
+        name: faker.name.firstName(),
+        surname: faker.name.lastName(),
+        second_name: faker.name.middleName(),
+        phone: faker.phone.phoneNumber(),
+        email: faker.internet.email(),
+        camp_member_id: camp.id,
+        group_member_id: group.id,
+        role: 1 << 2,
         hash: await argon.hash('1234'),
-        login: 'admin',
+        login: 'daddy@mail.ru',
       },
       {
-        name: 'Ruler',
-        role: 1 << 1,
-        hash: await argon.hash('1234'),
-        login: 'ruler',
-      },
-      {
-        name: 'Parent',
-        role: 1 << 1,
-        hash: await argon.hash('1234'),
-        login: 'parent',
-      },
-      {
-        name: 'Child 2',
+        name: faker.name.firstName(),
+        surname: faker.name.lastName(),
+        second_name: faker.name.middleName(),
+        phone: faker.phone.phoneNumber(),
+        email: faker.internet.email(),
+        camp_member_id: camp.id,
+        group_member_id: group.id,
         role: 1 << 3,
         hash: await argon.hash('1234'),
-        login: 'child_2',
+        login: 'brawlstars2@mail.ru',
         wallet_hash: await argon.hash(generateRandomPassword(60)),
       },
     ],
   });
-
-
 }
 
 main()

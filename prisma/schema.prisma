@@ -20,6 +20,10 @@ model User {
     surname String?
     second_name String?
 
+    room String?
+
+    age Int?
+
     phone String?
     email String?
 
@@ -40,9 +44,13 @@ model User {
     group_member_id Int?
     group_member Group? @relation("GroupMember",fields:[group_member_id], references:[id])
 
+    reviews Review[] @relation("UserReview")
+
     messages Message[] @relation("MessageSender")
 
     role Int @default(0)
+
+    transactions Transaction[] @relation("UserTransaction")
 
     wallet_hash String?
 
@@ -64,6 +72,8 @@ model Camp {
      admin User @relation("CampAdmin", fields:[admin_id], references:[id])
      members User[] @relation("CampMember")
      groups Group[] @relation("CampGroup")
+     longitude Float?
+     latitude Float?
 
      @@map("camp")
 }
@@ -71,8 +81,8 @@ model Camp {
 model Group {
     id Int @id @default(autoincrement())
     name String
-    leader_id Int
-    leader User @relation("GroupLeader", fields:[leader_id], references:[id])
+    leader_id Int?
+    leader User? @relation("GroupLeader", fields:[leader_id], references:[id])
     members User[] @relation("GroupMember")
     chats Chat[] @relation("GroupChat")
     alerts GroupAlert[] @relation("GroupAlerts")
@@ -142,4 +152,28 @@ model Diagnoz {
       description String
 
       @@map("diagnoz")
+}
+
+model Review {
+     id Int @id @default(autoincrement())
+     date DateTime @default(now())
+     user_id Int
+     user User @relation("UserReview", fields:[user_id], references:[id])
+     marks Int[]
+     comment String?
+
+     @@map("review")
+}
+
+model Transaction {
+    id Int @id @default(autoincrement())
+    date DateTime @default(now())
+    status Boolean @default(false)
+    hash String @unique
+    value Float
+
+    user_id Int
+    user User @relation("UserTransaction", fields:[user_id], references:[id])
+
+    @@map("transaction")
 }

@@ -16,8 +16,75 @@ export class UserService {
     private eventGetaway: EventsGateway,
   ) {}
 
-  async setChildren(){
+  async setChildren(user_id, dto) {}
 
+  async submitTransaction(dto) {
+    const transaction = await this.prismaService.transaction.update({
+      where: {
+        hash: dto.hash,
+      },
+      data: {
+        status: true,
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    if (transaction) {
+      const user = await this.prismaService.user.findFirst({
+        where: {
+          id: transaction.user.id,
+        },
+      });
+      await this.prismaService.user.update({
+        where: {
+          id: transaction.user.id,
+        },
+        data: {
+          balance: user.balance - transaction.value,
+        },
+      });
+
+      return {
+        success: true,
+      };
+    }
+
+    throw new BadRequestException({
+      message: 'wrong transaction',
+    });
+  }
+
+  async updateBalance(dto) {
+    const child = await this.prismaService.user.findUnique({
+      where: {
+        id: dto.child_id,
+      },
+    });
+
+    await this.prismaService.user.update({
+      where: {
+        id: dto.child_id,
+      },
+      data: {
+        balance: child.balance + parseInt(dto.balance),
+      },
+    });
+
+    return {
+      success: true,
+    };
+  }
+
+  async getAllUsers() {
+    return {
+      users: await this.prismaService.user.findMany({
+        orderBy: {
+          role: 'asc',
+        },
+      }),
+    };
   }
 
   async updateDataStaticUserData(user_id, dto) {
@@ -65,6 +132,15 @@ export class UserService {
         camp_member: true,
         parent: true,
         diagnozes: true,
+        children: {
+          include: {
+            reviews: {
+              where: {
+                date: new Date(),
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -116,13 +192,23 @@ export class UserService {
           },
         });
         if (sender_instance.balance > sender_credentials.price) {
-          console.log(`payment_${sender_credentials.sender_id}`);
-          this.eventGetaway.broadcast(
-            `payment_${sender_credentials.sender_id}`,
-            'submit transaction',
-          );
+          const transaction = await this.prismaService.transaction.create({
+            data: {
+              hash: await argon.hash(
+                this.utilService.generateRandomPassword(60),
+              ),
+              value: sender_credentials.price,
+              user_id: parseInt(sender_credentials.sender_id),
+            },
+          });
+          this.eventGetaway.broadcast(sender_credentials.sender_id, {
+            type: 'TRANSACTION_SUBMIT',
+            data: transaction.hash,
+          });
         } else {
-          console.log('no money');
+          throw new ForbiddenException({
+            message: 'no money',
+          });
         }
       } else {
         throw new ForbiddenException({

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
-import { UpdateStaticData, TransactionDto, SetChildren } from "./dto";
+import { UpdateStaticData, TransactionDto, SetChildren } from './dto';
 
 @UseGuards(AuthGuard('jwt-secure'))
 @Controller('user')
@@ -31,5 +31,20 @@ export class UserController {
   @Post('set_children')
   setChildren(@Req() req, @Body() dto: SetChildren) {
     return this.userService.setChildren(req.user.user_id, dto);
+  }
+
+  @Get('all_users')
+  getAllUsers() {
+    return this.userService.getAllUsers();
+  }
+
+  @Post('update_balance')
+  updateBalance(@Body() dto) {
+    return this.userService.updateBalance(dto);
+  }
+
+  @Post('submit_transaction')
+  submitTransaction(@Body() dto) {
+    return this.userService.submitTransaction(dto);
   }
 }

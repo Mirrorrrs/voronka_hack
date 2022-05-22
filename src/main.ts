@@ -6,6 +6,7 @@ import { WsAdapter } from '@nestjs/platform-ws';
 (async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
+  app.enableCors();
   app.useWebSocketAdapter(new WsAdapter(app));
-  await app.listen(3000, '192.168.230.99');
+  await app.listen(4000, '192.168.147.99');
 })();
